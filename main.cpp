@@ -4,6 +4,7 @@
 
 #define MR_PAIRING_SSP
 #define AES_SECURITY 80
+//#define AES_SECURITY 128
 
 #define STRLEN 10
 #define RUNTIMES 100
