@@ -53,6 +53,7 @@ int main()
     G1 V,P;
     G1 S[RUNTIMES],R[RUNTIMES],SEXP[RUNTIMES],REXP[RUNTIMES],SIG,HAS;
     GT T,U;
+    GT E[RUNTIMES],F[RUNTIMES];
     int lsb[RUNTIMES],i;
     Big s,X[RUNTIMES],exp[RUNTIMES];
     time_t seed;
@@ -102,10 +103,34 @@ int main()
 
     if(T==U)
     {
-        //cout<<"good"<<endl;
+        cout<<"verify success"<<endl;
         end=clock();
         double time=(double)(end-start)*1000/CLOCKS_PER_SEC;
         cout<<"time:"<<time/RUNTIMES<<endl;
     }
+    else
+    {
+        cout<<"verify fail"<<endl;
+        end=clock();
+        double time=(double)(end-start)*1000/CLOCKS_PER_SEC;
+        cout<<"time:"<<time/RUNTIMES<<endl;
+    }
+    start=clock();
+    for(i=0;i<RUNTIMES;i++)
+    {
+        E[i]=pfc.pairing(S[i],P);
+        F[i]=pfc.pairing(R[i],V);
+        if(E[i]==F[i])
+        {
+
+        }
+        else
+        {
+            break;
+        }
+    }
+    end=clock();
+    double time=(double)(end-start)*1000/CLOCKS_PER_SEC;
+    cout<<"without batch verify time:"<<time/RUNTIMES<<endl;
     return 0;
 }
