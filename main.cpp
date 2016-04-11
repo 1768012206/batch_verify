@@ -1,7 +1,6 @@
 #include <iostream>
 #include <ctime>
 
-
 #define MR_PAIRING_SSP
 #define AES_SECURITY 80
 //#define AES_SECURITY 128
@@ -126,6 +125,7 @@ int main()
         }
         else
         {
+            cout<<"bad"<<endl;
             break;
         }
     }
