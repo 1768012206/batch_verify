@@ -20,15 +20,12 @@ void rand_str(char* str,int len)
     str[i]='\0';
 }
 
-Big gen_exp()
+char* gen_exp(char* str)
 {
-    Big x;
-    char str[100]={'\0'};
-    //srand(time(NULL));
     int i,j;
     for(i=0;i<NUM*W;i=i+W)
     {
-        str[i]='0'+rand()%5*2+1;
+        str[i]='0'+rand()%2;
         for(j=1;j<=W;j++)
         {
             str[i+j]='0';
@@ -38,17 +35,14 @@ Big gen_exp()
     {
         str[i]=str[i+W-1];
     }
-    //cout<<str<<endl;
-    x=str;
-    return x;
-    //cout<<x<<endl;
-
+    return str;
 }
 
 int main()
 {
     clock_t start,end;
     PFC pfc(AES_SECURITY);
+    miracl *mip=get_mip();
     G1 V,P;
     G1 S[RUNTIMES],R[RUNTIMES],SEXP[RUNTIMES],REXP[RUNTIMES],SIG,HAS;
     GT T,U;
@@ -79,21 +73,32 @@ int main()
         //REXP[i]=pfc.mult(R[i],exp[i]);
     }
     delete [] str2;
-
+    char* str3[RUNTIMES];
+    char str4[RUNTIMES][200]={'\0'};
     start=clock();
-    exp[0]=gen_exp();
+    for(i=0;i<RUNTIMES;++i)
+    {
+        str3[i]=gen_exp(str4[i]);
+    }
+    mip->IOBASE=2;
+    for(i=0;i<RUNTIMES;++i)
+    {
+        exp[i]=str3[i];
+    }
+    mip->IOBASE=16;
+    //start=clock();
     SEXP[0]=pfc.mult(S[0],exp[0]);
     SIG=SEXP[0];
     REXP[0]=pfc.mult(R[0],exp[0]);
     HAS=REXP[0];
     for(i=1;i<RUNTIMES;++i)
     {
-        exp[i]=gen_exp();
         SEXP[i]=pfc.mult(S[i],exp[i]);
         SIG=SIG+SEXP[i];
         REXP[i]=pfc.mult(R[i],exp[i]);
         HAS=HAS+REXP[i];
     }
+    //start=clock();
     //cout<<SIG.g<<endl;
     T=pfc.pairing(P,SIG);
     //cout<<T.g<<endl;

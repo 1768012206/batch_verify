@@ -14,15 +14,12 @@
 #include "pairing_1.h"
 using namespace std;
 
-Big gen_exp()
+char* gen_exp(char* str)
 {
-    //miracl *mip=get_mip();
-    Big x;
-    char str[100]={'\0'};
     int i,j;
     for(i=0;i<NUM*W;i=i+W)
     {
-        str[i]='0'+rand()%5*2+1;
+        str[i]='0'+rand()%2;
         for(j=1;j<=W;j++)
         {
             str[i+j]='0';
@@ -32,9 +29,7 @@ Big gen_exp()
     {
         str[i]=str[i+W-1];
     }
-    //mip->IOBASE=16;
-    x=str;
-    return x;
+    return str;
 }
 
 int main()
@@ -42,24 +37,33 @@ int main()
     srand((unsigned int)time(NULL));
     PFC pfc(AES_SECURITY);
     miracl *mip=get_mip();
-    mip->IOBASE=10;
+    //mip->IOBASE=2;
     G1 g[100];
     Big r[100],w[100];
+    char* str[100];
+    char str2[100][200]={'\0'};
     int i;
     time_t seed;
     time(&seed);
     irand((long)seed);
     for(i=0;i<100;++i)
     {
-
         pfc.random(g[i]);
         pfc.random(r[i]);
-        w[i]=gen_exp();
+        str[i]=gen_exp(str2[i]);
     }
+    mip->IOBASE=2;
+    for(i=0;i<100;++i)
+    {
+        w[i]=str[i];
+    }
+    mip->IOBASE=16;
     clock_t s,d;
     double time;
     s=clock();
     G1 t1=pfc.mult(g[0],r[0]);
+    int x=bits(r[0]);
+    cout<<x<<endl;
     cout<<r[0]<<endl;
     for(i=1;i<100;++i)
     {
@@ -71,6 +75,12 @@ int main()
     clock_t ss,dd;
     ss=clock();
     G1 t2=pfc.mult(g[0],w[0]);
+    cout<<bits(w[0])<<endl;
+    /*for(i=0;i<100;++i)
+    {
+        cout<<bits(w[i])<<endl;
+        cout<<bits(r[i])<<endl;
+    }*/
     cout<<w[0]<<endl;
     for(i=1;i<100;++i)
     {
@@ -79,4 +89,7 @@ int main()
     dd=clock();
     time=(double)(dd-ss)*1000/CLOCKS_PER_SEC;
     cout<<"time:"<<time<<endl;
+    char str3[100]={'\0'};
+    cout<<str3<<endl;
+    return 0;
 }
