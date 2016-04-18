@@ -2,12 +2,12 @@
 #include <ctime>
 
 #define MR_PAIRING_SSP
-#define AES_SECURITY 80
-//#define AES_SECURITY 128
+//#define AES_SECURITY 80
+#define AES_SECURITY 128
 
 #define STRLEN 10
 #define RUNTIMES 100
-#define NUM 20
+#define NUM 40
 #define W 4
 #include "pairing_1.h"
 using namespace std;
@@ -75,7 +75,7 @@ int main()
     delete [] str2;
     char* str3[RUNTIMES];
     char str4[RUNTIMES][200]={'\0'};
-    start=clock();
+    //start=clock();
     for(i=0;i<RUNTIMES;++i)
     {
         str3[i]=gen_exp(str4[i]);
@@ -86,7 +86,7 @@ int main()
         exp[i]=str3[i];
     }
     mip->IOBASE=16;
-    //start=clock();
+    start=clock();
     SEXP[0]=pfc.mult(S[0],exp[0]);
     SIG=SEXP[0];
     REXP[0]=pfc.mult(R[0],exp[0]);

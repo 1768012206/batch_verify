@@ -9,7 +9,7 @@
 //(g1^r1)*...*(g100^r100)
 //(g1^w1)*...*(g100^w100)
 //*************
-#define NUM 20
+#define NUM 40
 #define W 4
 #include "pairing_1.h"
 using namespace std;
