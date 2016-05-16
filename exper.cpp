@@ -6,10 +6,10 @@
 #include <ctime>
 
 #define MR_PAIRING_SSP
-#define AES_SECURITY 80
-//#define AES_SECURITY 128
+//#define AES_SECURITY 80
+#define AES_SECURITY 128
 
-#define NS 10
+#define NS 100
 #define LEN 200
 #define RUNTIMES 100
 #define NUM 20
@@ -41,7 +41,6 @@ int main()
     clock_t start,end;
     PFC pfc(AES_SECURITY);
     miracl *mip=get_mip();
-    //mip->IOBSIZ=2000;
     int i;
     char str[NS][LEN]={'\0'};
     char* vstr[NS];
@@ -54,6 +53,7 @@ int main()
     for(i=0;i<NS;++i)
     {
         v[i]=vstr[i];
+        //pfc.random(v[i]);
     }
     mip->IOBASE=16;
     time_t seed;
@@ -70,9 +70,11 @@ int main()
     pfc.random(y);
     pfc.random(r);
     Big c;
+    Big p=get_modulus();
     pfc.random(c);
     char* hstr=(char*)"asdfadf";
-
+    G1 H1,H2;
+    Big V;
     start=clock();
 
     G1 Z=pfc.mult(z[0],v[0]);
@@ -82,12 +84,15 @@ int main()
     }
     pfc.pairing(Z,g);
 
-    Big V=v[0];
-    for(i=1;i<NS;++i)
+    V=v[0];
+    for(i=1;i<6;++i)
     {
         V=V*v[i];
+        V%=65537;
     }
-    G1 H1,H2;
+    //cout<<bits(V)<<endl;
+    //cout<<bits(get_modulus())<<endl;
+    //pfc.random(V);
     pfc.hash_and_map(H1,hstr);
     pfc.hash_and_map(H2,hstr);
     G1 H3=pfc.mult(H2,c);

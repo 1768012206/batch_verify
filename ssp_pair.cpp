@@ -526,7 +526,7 @@ PFC::PFC(int s, csprng *rng)
 #ifdef MR_SIMPLE_BASE
 	miracl *mip=mirsys((MIRACL/4)*words,16);
 #else
-	miracl *mip=mirsys(words,0); 
+	miracl *mip=mirsys(words,0);
 	mip->IOBASE=16;
 #endif
 	mod=new Big;
