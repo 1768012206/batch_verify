@@ -12,6 +12,8 @@
 #define AF 256
 #define LEN 20
 
+char alp[26];
+
 void rand_str(char* str,int len)
 {
     int i;
@@ -43,9 +45,14 @@ void str_to_bit(char value[], bitset<LEN> &b)
 
 int main()
 {
+    for(int i = 0; i < 26; ++i)
+    {
+        alp[i] = (char) ('a' + i);
+    }
     srand((int)time(0));
-    char* s= new char[STRLEN+1];
-    rand_str(s, STRLEN);
+    char* s = (char*) "ikkdtabyzhmknmwbwbkfrvwvttjvqd";
+    //char* s= new char[STRLEN+1];
+    //rand_str(s, STRLEN);
     //cout<< s << endl;
     char* front[BE];
     for(int i = 0; i < BE; ++i)
