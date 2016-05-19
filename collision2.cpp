@@ -8,12 +8,12 @@
 #include "big.h"
 
 #define HASH_LEN 20 //sha-1 hash value 160bit
-#define SELECT_LEN 10   //the selected length(bit) of hash value to find collision
+#define SELECT_LEN 12  //the selected length(bit) of hash value to find collision
 #define HASH_MAX 1000000 //the max number of hash values
 #define FIR_LEN 30  //first part of hash input length
 #define MAX_FIND_LEN 30 //max length to find collision
 
-char* s = (char*) "ikkdtabyzhmknmwbwbkfrvwvttjvqd"; //first part of hash input
+char* s = (char*) "ikkdtauyzhmknmwbwbjfrvwvttjvqd"; //first part of hash input
 //char val[HASH_MAX][20]; //restore hash value
 bitset<SELECT_LEN> bs[HASH_MAX];
 int bit_num = 0;
@@ -56,7 +56,9 @@ int find_collsion(int num, bitset<SELECT_LEN> b)
         //cout<<bj<<endl;
         if(bi.compare(bj) == 0)
         {
-            cout<< "collision " << num << endl;
+            cout<< "collision " << j << " " << num << endl;
+            //cout<< bi << endl;
+            //cout<< bj << endl;
             return num;
         }
     }
@@ -76,6 +78,8 @@ void sort(vector<char> data, vector<char> target, int num)
             cc[i] = target[i];
         }
         strcat(ss, cc);
+        ss[FIR_LEN+num] = '\0';
+        //cout<< ss << endl;
         char val[20];
         sha_1(val, ss, FIR_LEN+num);
         delete[] ss;
@@ -99,18 +103,21 @@ int main()
     clock_t start, end;
     vector<char> alp;   //alphabet
     bitset<8> byt[256];
-    for(int i = 0; i < 256; ++i)
+    for(int i = 1; i < 256; ++i)
     {
         byt[i] = i;
         unsigned long long int a = byt[i].to_ullong();
         alp.push_back((char)a);
     }
-    vector<char> b;
-    start = clock();
-    for(int i = 0; i < MAX_FIND_LEN; ++i)
+    /*for(int i = 0; i < 26; ++i)
     {
+        alp.push_back((char) ('a' + i));
+    }*/
+    start = clock();
+    for (int i = 0; i < MAX_FIND_LEN; ++i) {
+        vector<char> b;
         sort(alp, b, i);
-        if(find_if != -1) break;
+        if (find_if != -1) break;
     }
     end = clock();
     double time=(double)(end-start)*1000/CLOCKS_PER_SEC;
