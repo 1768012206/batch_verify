@@ -8,17 +8,18 @@
 #include "big.h"
 
 #define HASH_LEN 20 //sha-1 hash value 160bit
-#define SELECT_LEN 12  //the selected length(bit) of hash value to find collision
+#define SELECT_LEN 20  //the selected length(bit) of hash value to find collision
 #define HASH_MAX 1000000 //the max number of hash values
 #define FIR_LEN 30  //first part of hash input length
 #define MAX_FIND_LEN 30 //max length to find collision
+#define RUN_TIMES 100
 
 char* s = (char*) "ikkdtauyzhmknmwbwbjfrvwvttjvqd"; //first part of hash input
 //char val[HASH_MAX][20]; //restore hash value
 bitset<SELECT_LEN> bs[HASH_MAX];
 int bit_num = 0;
 int bit_num_now = 0;
-int find_if = -1;   // -1 means haven't find collision
+int find_if;   // -1 means haven't find collision
 
 void sha_1(char* value, char* input, int len)
 {
@@ -46,7 +47,7 @@ void val_to_bit(char value[], bitset<SELECT_LEN> &b)
     b = tmp2;
 }
 
-int find_collsion(int num, bitset<SELECT_LEN> b)
+void find_collsion(int num, bitset<SELECT_LEN> b)
 {
     string bi = b.to_string();
     //cout<<bi<<endl;
@@ -56,13 +57,12 @@ int find_collsion(int num, bitset<SELECT_LEN> b)
         //cout<<bj<<endl;
         if(bi.compare(bj) == 0)
         {
-            cout<< "collision " << j << " " << num << endl;
+            //cout<< "collision " << j << " " << num << endl;
             //cout<< bi << endl;
             //cout<< bj << endl;
-            return num;
+            find_if = num;
         }
     }
-    return -1;
 }
 
 void sort(vector<char> data, vector<char> target, int num)
@@ -86,7 +86,7 @@ void sort(vector<char> data, vector<char> target, int num)
         val_to_bit(val, bs[bit_num]);
         bit_num_now = bit_num;
         bit_num++;
-        find_if = find_collsion(bit_num_now, bs[bit_num_now]);
+        find_collsion(bit_num_now, bs[bit_num_now]);
         return;
     }
     for(int i = 0; i < data.size(); ++i)
@@ -113,14 +113,27 @@ int main()
     {
         alp.push_back((char) ('a' + i));
     }*/
-    start = clock();
-    for (int i = 0; i < MAX_FIND_LEN; ++i) {
-        vector<char> b;
-        sort(alp, b, i);
-        if (find_if != -1) break;
+    double time = 0;
+    for(int j = 0; j < RUN_TIMES; ++j)
+    {
+        bit_num = 0;
+        bit_num_now = 0;
+        find_if = -1;
+        start = clock();
+        for (int i = 1; i < MAX_FIND_LEN; ++i)
+        {
+            vector<char> b;
+            sort(alp, b, i);
+            if (find_if != -1) break;
+        }
+        end = clock();
+        double each = (double)(end-start)*1000/CLOCKS_PER_SEC;
+        time = time + each;
+        for(int i = 0; i < HASH_MAX; ++i)
+        {
+            bs[i].reset();
+        }
     }
-    end = clock();
-    double time=(double)(end-start)*1000/CLOCKS_PER_SEC;
-    cout<<"time:"<<time<<endl;
+    cout<<"time:"<<time/RUN_TIMES<<endl;
     return 0;
 }
