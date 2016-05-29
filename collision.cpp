@@ -1,26 +1,32 @@
 //
-// Created by max on 16-5-9.
+// Created by max on 16-5-18.
 //
+/*
+ * given a string which length is 30 + n bytes and hash the string,
+ * choose the bit length of the hash value,
+ * find the collisions of the selected bit length
+ */
 
 #include <iostream>
+#include <vector>
 #include <cstring>
 #include <bitset>
 #include "big.h"
 
-#define STRLEN 30
-#define BE 256
-#define AF 256
-#define LEN 20
+#define HASH_LEN 20 //sha-1 hash value is 160bit
+#define SELECT_LEN 27 //the selected length(bit) of hash value to find collision
+#define HASH_MAX 1000000 //the max number of hash values
+#define FIR_LEN 30  //first part of hash input length
+#define MAX_FIND_LEN 30 //max length to find collision
+#define RUN_TIMES 1
+#define COLLISIONS 10   // the number of collisions
 
-char alp[26];
-
-void rand_str(char* str,int len)
-{
-    int i;
-    for(i = 0; i < len; ++i)
-        str[i] = 'a' + rand()%26;
-    str[i] = '\0';
-}
+char* s = (char*) "ikkdtauyzhmknmwbwbjfrvwvttjvqd"; //first part of hash input
+//char val[HASH_MAX][20]; //restore hash value
+bitset<SELECT_LEN> bs[HASH_MAX];
+int bit_num = 0;
+int bit_num_now = 0;
+int find_if = 0;   // the number of collisions have found
 
 void sha_1(char* value, char* input, int len)
 {
@@ -33,64 +39,109 @@ void sha_1(char* value, char* input, int len)
     shs_hash(&sh, value);
 }
 
-void str_to_bit(char value[], bitset<LEN> &b)
+void val_to_bit(char value[], bitset<SELECT_LEN> &b)
 {
-    int char_num = LEN / 8;
-    int char_mod = LEN % 8;
-    for(int i = 0; i < char_num; ++i)
+    int char_num = SELECT_LEN / 8;
+    int char_mod = SELECT_LEN % 8;
+    bitset<8> tmp;
+    string str;
+    for(int i = 0; i < char_num + 1; ++i)
     {
+        tmp = (int) value[i];
+        str = str + tmp.to_string();
+    }
+    bitset<SELECT_LEN> tmp2(str, 0, SELECT_LEN);
+    b = tmp2;
+}
 
+void find_collsion(int num, bitset<SELECT_LEN> b)
+{
+    string bi = b.to_string();
+    //cout<<bi<<endl;
+    for(int j = 0; j < num; ++j)
+    {
+        string bj = bs[j].to_string();
+        //cout<<bj<<endl;
+        if(bi.compare(bj) == 0)
+        {
+            //cout<< "collision " << j << " " << num << " " << find_if << endl;
+            //cout<< bi << endl;
+            //cout<< bj << endl;
+            find_if ++;
+        }
+    }
+}
+
+void sort(vector<char> data, vector<char> target, int num)
+{
+    if(find_if >= COLLISIONS) return;
+    if(target.size() == num)
+    {
+        char* ss = new char[FIR_LEN+num];
+        strcpy(ss, s);
+        char cc[num];
+        for(int i = 0; i < num; ++i)
+        {
+            cc[i] = target[i];
+        }
+        strcat(ss, cc);
+        ss[FIR_LEN+num] = '\0';
+        //cout<< ss << endl;
+        char val[20];
+        sha_1(val, ss, FIR_LEN+num);
+        delete[] ss;
+        val_to_bit(val, bs[bit_num]);
+        bit_num_now = bit_num;
+        bit_num++;
+        find_collsion(bit_num_now, bs[bit_num_now]);
+        return;
+    }
+    for(int i = 0; i < data.size(); ++i)
+    {
+        vector<char> newdata(data);
+        vector<char> newtarget(target);
+        newtarget.push_back(newdata[i]);
+        sort(newdata, newtarget, num);
     }
 }
 
 int main()
 {
-    for(int i = 0; i < 26; ++i)
+    clock_t start, end;
+    vector<char> alp;   //alphabet
+    bitset<8> byt[256];
+    for(int i = 1; i < 256; ++i)
     {
-        alp[i] = (char) ('a' + i);
+        byt[i] = i;
+        unsigned long long int a = byt[i].to_ullong();
+        alp.push_back((char)a);
     }
-    srand((int)time(0));
-    char* s = (char*) "ikkdtabyzhmknmwbwbkfrvwvttjvqd";
-    //char* s= new char[STRLEN+1];
-    //rand_str(s, STRLEN);
-    //cout<< s << endl;
-    char* front[BE];
-    for(int i = 0; i < BE; ++i)
+    /*for(int i = 0; i < 26; ++i)
     {
-        front[i] = new char[STRLEN+1];
-        strcpy(front[i], s);
-    }
-    bitset<8> b[BE];
-    for(int i = 0; i < BE; ++i)
+        alp.push_back((char) ('a' + i));
+    }*/
+    double time = 0;
+    double each = 0;
+    for(int j = 0; j < RUN_TIMES; ++j)
     {
-        b[i] = i;
-        unsigned long long int a = b[i].to_ullong();
-        //cout<< (char)a << endl;
-        char c[1];
-        c[0] = (char)a;
-        strcat(front[i], c);
-        //cout<< front[i] << endl;
-    }
-    char value[BE][20];
-
-    for(int i = 0; i < BE; ++i)
-    {
-        sha_1(value[i], front[i], STRLEN+1);
-        b[i] = (int) value[i][0];
-        cout<< b[i] << " " << i << endl;
-    }
-
-    for(int i = 0; i < 256; ++i)
-    {
-        for(int j = 1; j < 256; ++j)
+        bit_num = 0;
+        bit_num_now = 0;
+        find_if = 0;
+        start = clock();
+        for (int i = 1; i < MAX_FIND_LEN; ++i)
         {
-            string bi = b[i].to_string();
-            string bj = b[j].to_string();
-            if(i == j) continue;
-            if(bi.compare(bj) == 0)
-            {
-                cout<< "collision " << i << " " << j << endl;
-            }
+            vector<char> b;
+            sort(alp, b, i);
+            if (find_if >= COLLISIONS) break;
+        }
+        end = clock();
+        each = (double) (end - start) * 1000 / CLOCKS_PER_SEC;
+        time = time + each;
+        for(int i = 0; i < HASH_MAX; ++i)
+        {
+            bs[i].reset();
         }
     }
+    cout<<"time:"<<time / (RUN_TIMES * COLLISIONS) <<endl;
+    return 0;
 }
