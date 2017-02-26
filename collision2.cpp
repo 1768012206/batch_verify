@@ -8,12 +8,12 @@
 #include "big.h"
 
 #define HASH_LEN 20 //sha-1 hash value 160bit
-#define SELECT_LEN 10   //the selected length(bit) of hash value to find collision
+#define SELECT_LEN 25   //the selected length(bit) of hash value to find collision
 #define HASH_MAX 1000000 //the max number of hash values
 #define FIR_LEN 30  //first part of hash input length
 #define MAX_FIND_LEN 30 //max length to find collision
 
-char* s = (char*) "ikkdtabyzhmknmwbwbkfrvwvttjvqd"; //first part of hash input
+char* s = (char*) "itsdtabyzhmknmwbwbkfrvwvttjvqd"; //first part of hash input
 //char val[HASH_MAX][20]; //restore hash value
 bitset<SELECT_LEN> bs[HASH_MAX];
 int bit_num = 0;
@@ -56,7 +56,7 @@ int find_collsion(int num, bitset<SELECT_LEN> b)
         //cout<<bj<<endl;
         if(bi.compare(bj) == 0)
         {
-            cout<< "collision " << num << endl;
+            cout<< "collision " << j << " " << num << endl;
             return num;
         }
     }
@@ -76,6 +76,7 @@ void sort(vector<char> data, vector<char> target, int num)
             cc[i] = target[i];
         }
         strcat(ss, cc);
+        cout<< ss << endl;
         char val[20];
         sha_1(val, ss, FIR_LEN+num);
         delete[] ss;
@@ -107,8 +108,9 @@ int main()
     }
     vector<char> b;
     start = clock();
-    for(int i = 0; i < MAX_FIND_LEN; ++i)
+    for(int i = 1; i < MAX_FIND_LEN; ++i)
     {
+        cout<< i << endl;
         sort(alp, b, i);
         if(find_if != -1) break;
     }
