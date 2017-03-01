@@ -8,7 +8,7 @@
 #define MR_PAIRING_SSP
 #define AES_SECURITY 128
 
-#define N 20
+#define N 100
 
 #include "pairing_1.h"
 using namespace std;
@@ -26,11 +26,11 @@ double ini_step1() {
     start = clock();
     pfc.hash_and_map(v, (char*)"asdf");
     E = pfc.hash_to_group((char*)"asdfqwre");
+    G1 tmp1, tmp2;
+    tmp1 = si10 + pfc.mult(si11, E);
+    tmp2 = tmp1 + pfc.mult(v, oi);
     for(int j = 0; j < N; j++) {
         pfc.hash_and_map(f[j], (char*)"asdfi");
-        G1 tmp1, tmp2;
-        tmp1 = si10 + pfc.mult(si11, E);
-        tmp2 = tmp1 + pfc.mult(v, oi);
         y[j] = tmp2 + pfc.mult(f[j], ni);
     }
     end = clock();

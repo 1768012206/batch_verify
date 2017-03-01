@@ -16,8 +16,13 @@ int main()
 {
     clock_t start, end;
     PFC pfc(AES_SECURITY);
+    //miracl *mip = get_mip();
+    //mip->IOBASE = 10;
     Big r, t, a;
     G1 g, g1, g2;
+    time_t seed;
+    time(&seed);
+    irand((long)seed);
     start = clock();
     for(int j = 0; j < RUNTIMES; ++j)
     {
