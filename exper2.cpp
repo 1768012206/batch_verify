@@ -14,7 +14,7 @@
 using namespace std;
 PFC pfc(AES_SECURITY);
 
-double ini_step1() {
+double ini_step1_vehicle() {
     clock_t start, end;
     Big ni,oi;
     pfc.random(ni);
@@ -35,33 +35,48 @@ double ini_step1() {
     }
     end = clock();
     double time=(double)(end-start)*1000/CLOCKS_PER_SEC;
+    return time;
+}
 
-    G1 v2, f2[N], y2[N][N];
-    Big oi2[N], ni2[N], E2[N];
+double ini_step1_manager() {
+    clock_t start, end;
+    double time = 0;
+    G1 v, f[N], y[N][N], s0[N], s1[N], ff[N];
+    Big o[N], n[N], E[N];
     for(int i = 0; i < N; i++) {
-        pfc.random(oi2[i]);
-        pfc.random(ni2[i]);
+        pfc.random(o[i]);
+        pfc.random(n[i]);
+        pfc.random(s0[i]);
+        pfc.random(s1[i]);
     }
     start = clock();
-    pfc.hash_and_map(v2, (char*)"asdf");
+    pfc.hash_and_map(v, (char*)"asdf");
     for(int i = 0; i < N; i++) {
-        E2[i] = pfc.hash_to_group((char*)"asdfqwer");
+        E[i] = pfc.hash_to_group((char*)"asdfqwer");
+        pfc.hash_and_map(f[i], (char*)"asdf");
     }
-    for(int j = 0; j < N; j++) {
-        pfc.hash_and_map(f2[j], (char*)"asdfi");
-    }
-    G1 v_tmp[N];
+    end = clock();
+    time = (double)(end-start)*1000/CLOCKS_PER_SEC;
+    G1 tmps1[N];
     for(int i = 0; i < N; i++) {
-        G1 tmp1, tmp2, tmp3[N][N];
-        tmp1 = si10 + pfc.mult(si11, E2[i]);
-        tmp2 = tmp1 + pfc.mult(v_tmp[i], oi2[i]);
+        tmps1[i] = pfc.mult(s1[i], E[i]);
+    }
+    G1 tmp1, tmp2, tmp3;
+    pfc.precomp_for_mult(v);
+    for(int i = 0; i < N; i++) {
+        pfc.precomp_for_mult(f[i]);
+    }
+    start = clock();
+    for(int i = 0; i < N; i++) {
+        tmp1 = s0[i] + tmps1[i];
+        tmp2 = tmp1 + pfc.mult(v, o[i]);
         for(int j = 0; j < N; j++) {
-            pfc.mult(tmp3[j][i], ni2[i]);
-            y2[j][i] = tmp2 + tmp3[j][i];
+            tmp3 = pfc.mult(f[j], n[i]);
+            y[j][i] = tmp2 + tmp3;
         }
     }
     end = clock();
-    time= time + (double)(end-start)*1000/CLOCKS_PER_SEC;
+    time = time + (double)(end-start)*1000/CLOCKS_PER_SEC;
     return time;
 }
 
@@ -134,5 +149,8 @@ double join_step1() {
 }
 
 int main() {
-    cout<<ini_step1();
+    //cout<<ini_step1_vehicle()<<endl;
+    //cout<<ini_step1_manager();
+    //cout<<ini_step2();
+    cout<<join_step1();
 }
