@@ -148,9 +148,42 @@ double join_step1() {
     return time;
 }
 
+double join_step2() {
+    clock_t start, end;
+    G1 pl0, pl1, pi0, pi1, E, al, ai, gpub, bi, bI, v;
+    GT O;
+    Big El, Ei;
+    pfc.random(pi0); pfc.random(pi1); pfc.random(Ei); pfc.random(E); pfc.random(al); pfc.random(ai);
+    pfc.random(gpub); pfc.random(bi); pfc.random(bI); pfc.random(v);
+    O = pfc.pairing(pl0, pl1);
+    start = clock();
+    pfc.hash_and_map(pl0, (char*)"asdf0");
+    pfc.hash_and_map(pl1, (char*)"asdf1");
+    El = pfc.hash_to_group((char*)"asdfqer");
+    E = E + al;
+    E = E + ai;
+    G1 tmp = pl0 + pfc.mult(pl1, Ei);
+    tmp = tmp + pi0;
+    tmp = tmp + pfc.mult(pi1, Ei);
+    GT tmpt = pfc.pairing(tmp, gpub);
+    O = O * tmpt;
+    G1 tmp2 = bi + bI;
+    GT tmpt2 = pfc.pairing(v, tmp2);
+    O = O * tmpt2;
+    G1 dl = pl0 + pl1;
+    dl = dl + pi0;
+    for(int i = 0; i < N; i++) {
+        G1 ylj = pi0;
+    }
+    end = clock();
+    double time=(double)(end-start)*1000/CLOCKS_PER_SEC;
+    return time;
+}
+
 int main() {
     //cout<<ini_step1_vehicle()<<endl;
     //cout<<ini_step1_manager();
     //cout<<ini_step2();
     cout<<join_step1();
+    //cout<<join_step2();
 }
