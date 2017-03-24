@@ -97,6 +97,22 @@ Big H1(char *string)
     return h;
 }
 
+Big myHash(char* string) {
+	char s[32];
+	int i,j;
+	sha256 sh;
+
+	shs256_init(&sh);
+
+	for (i=0;;i++)
+	{
+		if (string[i]==0) break;
+		shs256_process(&sh,string[i]);
+	}
+	shs256_hash(&sh,s);
+	return from_binary(32,s);
+}
+
 void PFC::start_hash(void)
 {
 	shs256_init(&SH);
@@ -622,13 +638,32 @@ void PFC::rankey(Big& k)
 }
 
 // Can be done deterministicly
-
+Big in27=inverse(27,get_modulus());
+Big in3=inverse(3,get_modulus());
 void PFC::hash_and_map(G1& w,char *ID)
 {
+	/*
     Big x0=H1(ID);
 	if (is_on_curve(x0)) w.g.set(x0);
     else                 w.g.set(-x0);
 	w.g*=(*cof);
+	 */
+	Big u=myHash(ID);
+	Big mod=get_modulus();
+	Big in27=inverse(27,mod);
+	Big in3=inverse(3,mod);
+	Big v1=(-9-pow(u,4,mod)+mod)%mod;
+	Big v2=inverse((6*u)%mod,mod);
+	Big v=modmult(v1,v2,mod);
+	Big u6=modmult(pow(u,6,mod),in27,mod);
+	Big x0=(pow(v,2,mod)-u6+mod)%(mod);
+	Big expo=(2*mod-1)/3;
+	Big x1=pow(x0,expo,mod);
+	Big x2=modmult(pow(u,2,mod),in3,mod);
+	Big x=(x1+x2)%mod;
+	Big y=(modmult(u,x,mod)+v)%mod;
+	//if(w.g.set(x,y)) cout<<"success"<<endl;
+	w.g.set(x,y);
 }
 
 void PFC::random(G1& w)
