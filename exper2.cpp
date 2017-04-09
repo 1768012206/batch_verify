@@ -8,7 +8,7 @@
 #define MR_PAIRING_SSP
 #define AES_SECURITY 128
 
-#define N 1
+#define N 10
 
 #include "pairing_1.h"
 using namespace std;
@@ -27,6 +27,13 @@ double ini_step1_vehicle() {
     pfc.hash_and_map(v, (char*)"asdf");
     E = pfc.hash_to_group((char*)"asdfqwre");
     G1 tmp1, tmp2;
+    /*end = clock();
+    double time=(double)(end-start)*1000/CLOCKS_PER_SEC;
+    pfc.precomp_for_mult(v);
+    for(int i = 0; i < N; i++) {
+        pfc.precomp_for_mult(f[i]);
+    }
+    start = clock();*/
     tmp1 = si10 + pfc.mult(si11, E);
     tmp2 = tmp1 + pfc.mult(v, oi);
     for(int j = 0; j < N; j++) {
@@ -49,11 +56,22 @@ double ini_step1_manager() {
         pfc.random(s0[i]);
         pfc.random(s1[i]);
     }
+    G1 tmp1, tmp2, tmp3;
+    G1 si10,si11;
+    Big oi,ni;
+    pfc.random(si10); pfc.random(si11); pfc.random(oi); pfc.random(ni);
     start = clock();
     pfc.hash_and_map(v, (char*)"asdf");
     for(int i = 0; i < N; i++) {
         E[i] = pfc.hash_to_group((char*)"asdfqwer");
         pfc.hash_and_map(f[i], (char*)"asdf");
+    }
+
+    tmp1 = si10 + pfc.mult(si11, E[0]);
+    tmp2 = tmp1 + pfc.mult(v, oi);
+    for(int j = 0; j < N; j++) {
+        pfc.hash_and_map(f[j], (char*)"asdfi");
+        y[j][0] = tmp2 + pfc.mult(f[j], ni);
     }
     end = clock();
     time = (double)(end-start)*1000/CLOCKS_PER_SEC;
@@ -61,13 +79,13 @@ double ini_step1_manager() {
     for(int i = 0; i < N; i++) {
         tmps1[i] = pfc.mult(s1[i], E[i]);
     }
-    G1 tmp1, tmp2, tmp3;
+
     pfc.precomp_for_mult(v);
     for(int i = 0; i < N; i++) {
         pfc.precomp_for_mult(f[i]);
     }
     start = clock();
-    for(int i = 0; i < N; i++) {
+    for(int i = 0; i < N/5; i++) {
         tmp1 = s0[i] + tmps1[i];
         tmp2 = tmp1 + pfc.mult(v, o[i]);
         for(int j = 0; j < N; j++) {
@@ -165,11 +183,15 @@ double join_step2() {
     G1 tmp = pfc.mult(pl0, -1) + pfc.mult(pl1, Ei);
     tmp = tmp + pi0;
     tmp = tmp + pfc.mult(pi1, Ei);
-    GT tmpt = pfc.pairing(tmp, gpub);
+    /*GT tmpt = pfc.pairing(tmp, gpub);
     O = O * tmpt;
     G1 tmp2 = pfc.mult(bi, -1) + bI;
     GT tmpt2 = pfc.pairing(v, tmp2);
-    O = O * tmpt2;
+    O = O * tmpt2;*/
+    G1 tmp2 = pfc.mult(bi, -1) + bI;
+    G1 *mu1[2]={&tmp,&gpub},*mu2[2]={&v,&tmp2};
+    GT mul_res=pfc.multi_pairing(2,mu1,mu2);
+    O=O*mul_res;
     G1 dl = pl0 + pl1;
     dl = dl + pfc.mult(pi0, -1);
     for(int i = 0; i < N; i++) {
@@ -180,7 +202,7 @@ double join_step2() {
     return time;
 }
 
-double leaving() {
+double leaving_case1() {
     clock_t start, end;
     G1 pl0, pl1, pi0, pi1, al, ai, bl, bi, g, v, E, dl, pI;
     Big El, Ei;
@@ -191,16 +213,20 @@ double leaving() {
     pfc.hash_and_map(pl0, (char*)"asdf0");
     pfc.hash_and_map(pl1, (char*)"asdf1");
     El = pfc.hash_to_group((char*)"asdfwq");
-    E = E + al; E = E + pfc.mult(ai, -1);
-    G1 tmp = pl0 + pfc.mult(pl1, Ei);
-    tmp = tmp + pfc.mult(pI, -1);
+    E = E + al; E = E + ai;
+    G1 tmp = pl0 ;//+ pfc.mult(pl1, Ei);
+    tmp = tmp + pI;
     tmp = tmp + pfc.mult(pI, Ei);
-    GT gt1 = pfc.pairing(tmp, g);
+    /*GT gt1 = pfc.pairing(tmp, g);
     O = O * gt1;
     GT gt2 = pfc.pairing(v, bl + pfc.mult(bi, -1));
-    O = O * gt2;
+    O = O * gt2;*/
+    G1 tmp2=bl + bi;
+    G1 *mu1[2]={&tmp,&v}, *mu2[2]={&g,&tmp2};
+    GT mul_res=pfc.multi_pairing(2,mu1,mu2);
+    O=O*mul_res;
     dl = dl + pl0;
-    dl = dl + pfc.mult(pl1, -1);
+    dl = dl + pl1;
     end = clock();
     double time=(double)(end-start)*1000/CLOCKS_PER_SEC;
     return time;
@@ -211,11 +237,40 @@ double mode1_step1() {
     G1 P, C, S, Pub, F;
     Big x, h;
     pfc.random(P); pfc.random(x); pfc.random(Pub); pfc.random(S);
+    GT gt=pfc.pairing(S,P), t2;
     start = clock();
     //pfc.hash_to_group((char*)"asdf");
     C = pfc.mult(P, x);
     h = pfc.hash_to_group((char*)"asdf");
     F = pfc.mult(S, h) + pfc.mult(Pub, x);
+
+    pfc.mult(P, x);
+    pfc.mult(P, x);
+    t2=pfc.power(gt,x);
+    pfc.hash_to_aes_key(t2);
+    end = clock();
+    double time=(double)(end-start)*1000/CLOCKS_PER_SEC;
+    return time;
+}
+
+double mode2_step1() {
+    clock_t start,end;
+    G1 P, C, S, Pub, F;
+    Big x, h;
+    pfc.random(P); pfc.random(x); pfc.random(Pub); pfc.random(S);
+    GT gt=pfc.pairing(S,P);
+    start = clock();
+    //pfc.hash_to_group((char*)"asdf");
+    C = pfc.mult(P, x);
+    h = pfc.hash_to_group((char*)"asdf");
+    F = pfc.mult(S, h) + pfc.mult(Pub, x);
+
+    for(int i=0;i<N;i++) {
+        pfc.mult(P, x);
+        pfc.mult(P, x);
+        GT t2=pfc.power(gt,x);
+        pfc.hash_to_aes_key(t2);
+    }
     end = clock();
     double time=(double)(end-start)*1000/CLOCKS_PER_SEC;
     return time;
@@ -231,9 +286,12 @@ double mode1_step2() {
     pfc.random(C); pfc.random(Pub); pfc.random(F); pfc.random(P);
     start = clock();
     //pfc.hash_to_group((char*)"asdf");
-    GT tmp = pfc.pairing(d, A1);
+    /*GT tmp = pfc.pairing(d, A1);
     GT tmp2 = pfc.pairing(pfc.mult(f, -1), A2);
-    GT tmp3 = tmp * tmp2;
+    GT tmp3 = tmp * tmp2;*/
+    G1 fg=pfc.mult(f, -1);
+    G1 *mu1[2]={&d,&fg}, *mu2[2]={&A1,&A2};
+    GT tmp3=pfc.multi_pairing(2,mu1,mu2);
     pfc.hash_to_aes_key(tmp3);
 
     h = pfc.hash_to_group((char*)"asdf");
@@ -296,12 +354,26 @@ double mode3_step2() {
     clock_t start, end;
     G1 d, f, A1, A2;
     pfc.random(d); pfc.random(f); pfc.random(A1); pfc.random(A2);
+
+    G1 F, P, C, Pub, Tmp;
+    Big h;
+    pfc.random(C); pfc.random(Pub); pfc.random(F); pfc.random(P);
     start = clock();
     pfc.hash_to_group((char*)"asdf");
-    GT tmp = pfc.pairing(d, A1);
+    /*GT tmp = pfc.pairing(d, A1);
     GT tmp2 = pfc.pairing(pfc.mult(f, -1), A2);
-    GT tmp3 = tmp * tmp2;
+    GT tmp3 = tmp * tmp2;*/
+    G1 fg=pfc.mult(f, -1);
+    G1 *mu1[2]={&d,&fg}, *mu2[2]={&A1,&A1};
+    GT tmp3=pfc.multi_pairing(2,mu1,mu2);
     pfc.hash_to_aes_key(tmp3);
+
+    h = pfc.hash_to_group((char*)"asdf");
+    pfc.pairing(F, P);
+    pfc.hash_and_map(Tmp, (char*)"asdf");
+    G1 Tmp2 = pfc.mult(Tmp, h);
+    Tmp2 = C + Tmp2;
+    pfc.pairing(Tmp2, Pub);
     end = clock();
     double time=(double)(end-start)*1000/CLOCKS_PER_SEC;
     return time;
@@ -320,18 +392,6 @@ int main() {
     time(&seed);
     irand((long)seed);
 
-    char* str[1000];
-    for(int i=0;i<1000;i++) {
-        str[i]=new char[101];
-        rand_str(str[i],100);
-    }
-    G1 x;
-    clock_t start, end;
-    start = clock();
-    for(int i=0;i<1000;i++) {
-        pfc.hash_and_map(x,str[i]);
-    }
-    end = clock();
-    double time=(double)(end-start)*1000/CLOCKS_PER_SEC;
-    cout<<time/1000<<endl;
+    //cout<<ini_step1_vehicle()<<endl;
+    cout<<ini_step1_manager();
 }

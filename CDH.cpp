@@ -1,21 +1,22 @@
 //
 // Created by max on 16-5-29.
 //
-
+#include <iostream>
 #include <ctime>
 
 #define MR_PAIRING_SSP
 #define AES_SECURITY 80
 
-#define GAMA 100000
+#define GAMA 2000
 #define RUNTIMES 10
 
 #include "pairing_1.h"
+using namespace std;
+PFC pfc(AES_SECURITY);
 
 int main()
 {
     clock_t start, end;
-    PFC pfc(AES_SECURITY);
     //miracl *mip = get_mip();
     //mip->IOBASE = 10;
     Big r, t, a;
