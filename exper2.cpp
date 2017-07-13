@@ -232,6 +232,31 @@ double leaving_case1() {
     return time;
 }
 
+double leaving_step1() {
+    clock_t start, end;
+    G1 C, F, P, S, Pub, tmp;
+    Big h, x;
+    pfc.random(P); pfc.random(x); pfc.random(Pub); pfc.random(S), pfc.random(F), pfc.random(C);
+    pfc.random(x);
+    start = clock();
+    C = pfc.mult(P, x);
+    h = pfc.hash_to_group((char*)"asdf");
+    F = pfc.mult(S, h) + pfc.mult(Pub, x);
+    C = pfc.mult(P, x);
+    h = pfc.hash_to_group((char*)"asdf");
+    F = pfc.mult(S, h) + pfc.mult(Pub, x);
+
+    h = pfc.hash_to_group((char*)"asdf");
+    pfc.pairing(F, P);
+    pfc.hash_and_map(tmp, (char*)"asdf");
+    G1 tmp2 = pfc.mult(tmp, h);
+    tmp2 = C + tmp2;
+    pfc.pairing(tmp2, Pub);
+    end = clock();
+    double time=(double)(end-start)*1000/CLOCKS_PER_SEC;
+    return time;
+}
+
 double mode1_step1() {
     clock_t start,end;
     G1 P, C, S, Pub, F;
@@ -393,5 +418,6 @@ int main() {
     irand((long)seed);
 
     //cout<<ini_step1_vehicle()<<endl;
-    cout<<ini_step1_manager();
+    //cout<<ini_step1_manager();
+    cout<<leaving_step1();
 }
