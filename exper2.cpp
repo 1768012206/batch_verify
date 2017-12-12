@@ -412,12 +412,50 @@ void rand_str(char* str,int len)
     str[i]='\0';
 }
 
+double myhash() {
+    clock_t start, end;
+    G1 f;
+    start = clock();
+    pfc.hash_and_map(f, (char*)"asdf");
+    end = clock();
+    double time=(double)(end-start)*1000/CLOCKS_PER_SEC;
+    return time;
+}
+
+double pair4() {
+    clock_t start, end;
+    G1 a ,b;
+    pfc.random(a); pfc.random(b);
+    start = clock();
+    pfc.pairing(a, b); pfc.pairing(a, b); pfc.pairing(a, b); pfc.pairing(a, b);
+    end = clock();
+    double time=(double)(end-start)*1000/CLOCKS_PER_SEC;
+    return time;
+}
+
 int main() {
     time_t seed;
     time(&seed);
     irand((long)seed);
 
-    //cout<<ini_step1_vehicle()<<endl;
-    //cout<<ini_step1_manager();
-    cout<<leaving_step1();
+    /*G1 d, g, a, b, e, f;
+    pfc.random(d); pfc.random(g); pfc.random(a); pfc.random(b); pfc.random(e); pfc.random(f);
+    GT o = pfc.pairing(a, b);
+
+
+    //G1 P,Pub,C,S,F;
+    //Big h, x;
+    //pfc.random(P); pfc.random(x); pfc.random(Pub); pfc.random(S),pfc.random(F);
+    clock_t start, end;
+    start = clock();
+    pfc.pairing(d, g);
+    GT l = pfc.pairing(e, f);
+    o*l;
+    //C = pfc.mult(P, x);
+    //h = pfc.hash_to_group((char*)"asdf");
+    //F = pfc.mult(S, h) + pfc.mult(Pub, x);
+    end = clock();
+    double time=(double)(end-start)*1000/CLOCKS_PER_SEC;
+    cout<<time;*/
+    cout << pair4() << endl;
 }
