@@ -6,29 +6,36 @@
 .idea
 *.iml
 out
-gen### Java template
-# Compiled class file
-*.class
+gen
 
-# Log file
-*.log
+# Prerequisites
+*.d
 
-# BlueJ files
-*.ctxt
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
 
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
 
-# Package Files #
-*.jar
-*.war
-*.ear
-*.zip
-*.tar.gz
-*.rar
+# Fortran moule files
+*.mod
+*.smod
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
+# Compiled Static libraries
+*.lai
+*.la
+#*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
 
 build/
 cmake-build-debug/
